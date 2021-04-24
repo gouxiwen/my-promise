@@ -9,17 +9,30 @@ const mp = new MyPromise((resolve, reject) => {
 const mp1 = new MyPromise((resolve, reject) => {
     reject('失败')
 })
-
-mp.then(suc => {
-    console.log(suc)
-}, err => {
-    console.error(err)
+const mp2 = new MyPromise((resolve, reject) => {
+    resolve()
 })
-mp1.then(suc => {
-    console.log(suc)
-}, err => {
-    console.error(err)
-    return '123'
-}).then(res => {
-    console.log(res)
+
+// mp.then(suc => {
+//     console.log(suc)
+// }, err => {
+//     console.error(err)
+// })
+// mp1.then(suc => {
+//     console.log(suc)
+// }, err => {
+//     console.error(err)
+//     return '123'
+// }).then(res => {
+//     console.log(res)
+// })
+
+mp2.then(() => {
+    return MyPromise.reject('错误')
+})
+.then(res => {
+    console.log('then', res) // 这里不执行
+})
+.catch(err => {
+    console.log('catch', err)
 })

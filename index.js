@@ -138,7 +138,7 @@ module.exports =  class MyPromise {
 
     // then函数
     then(onFulfilled, onRejected) {
-        let that = this;
+        let self = this;
         let promise2 = null;
         // 解决不传参或者参数不是function
         onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : v => v;
@@ -149,12 +149,12 @@ module.exports =  class MyPromise {
         promise2 = new MyPromise((resolve, reject) => {
             // 状态是pending说明resolve/reject还没有执行，异步
             if (this.state === PENDING) {
-                console.log('then pending')
+                // console.log('then pending')
                 this.onFulfilledCallbacks.push(() => {
                     setTimeout(() => {
                         try {
                             let x = onFulfilled(this.value)
-                            console.log('then return', x, typeof x)
+                            console.log('then resovle1 return', x, typeof x)
                             self.resolvePromise(promise2, x, resolve, reject)
                         } catch (error) {
                             reject(error)
@@ -165,7 +165,7 @@ module.exports =  class MyPromise {
                     setTimeout(() => {
                         try {
                             let x = onRejected(this.reason)
-                            console.log('then return', x, typeof x)
+                            console.log('then reject1 return', x, typeof x)
                             self.resolvePromise(promise2, x, resolve, reject)
                         } catch (error) {
                             reject(error)
@@ -174,11 +174,11 @@ module.exports =  class MyPromise {
                 })
             }
             if (this.state === FULFILLED) {
-                console.log('then fulfilled')
+                // console.log('then fulfilled')
                 setTimeout(() => {
                     try {
                         let x = onFulfilled(this.value)
-                        console.log('then return', x, typeof x)
+                        console.log('then resolve2 return', x, typeof x)
                         self.resolvePromise(promise2, x, resolve, reject)
                     } catch (error) {
                         reject(error)
@@ -187,11 +187,11 @@ module.exports =  class MyPromise {
             }
     
             if (this.state === REJECTED) {
-                console.log('then rejected')
+                // console.log('then rejected')
                 setTimeout(() => {
                     try {
                         let x = onRejected(this.reason)
-                        console.log('then return', x, typeof x)
+                        console.log('then reject2 return', x, typeof x)
                         self.resolvePromise(promise2, x, resolve, reject)
                     } catch (error) {
                         reject(error)
@@ -206,6 +206,7 @@ module.exports =  class MyPromise {
 
     // 解决then里面返回了任何值（包括promise）的情况，通过递归调用取到最后返回的不是promise对象为止
     resolvePromise(promise2, x, resolve, reject) {
+        console.log('resolvePromise', x)
         let self = this;
         let called = false;
         // 防止循环引用，自己等待自己
@@ -214,17 +215,31 @@ module.exports =  class MyPromise {
         }
         if (x !== null && (Object.prototype.toString.call(x) === '[object Object]' || Object.prototype.toString.call(x) === '[object Function]')) {
             // x是对象或者函数
+            // 自己实现的MyPromise返回的是一个对象
             try {
                 let then = x.then;
                 if (typeof then === 'function') {
                     // 如果then是个方法，说明x是一个promise实例，执行then方法
-                    then.call(x, (v) => {
-                        // 别人的Promise的then方法可能设置了getter等，使用called防止多次调用then方法
-                        if (called) return;
-                        called = true;
-                        // 再次递归调用resolvePromise处理返回值，直到x不是promise
-                        resolvePromise(promise2, v, resolve, reject)
-                    })
+                    // 这里还要判断promise的状态是rejected还是resolved，如果是rejected就调用reject()
+                    if (x.state === FULFILLED) {
+                        // 例如 return Promise.resolve()
+                        then.call(x, (v) => {
+                            // 别人的Promise的then方法可能设置了getter等，使用called防止多次调用then方法
+                            if (called) return;
+                            called = true;
+                            // 再次递归调用resolvePromise处理返回值，直到x不是promise
+                            resolvePromise(promise2, v, resolve, reject)
+                        })
+                    } else {
+                        // 例如 return Promise.reject()
+                        then.call(x, () => {},
+                        (v) => {
+                            // 别人的Promise的then方法可能设置了getter等，使用called防止多次调用then方法
+                            if (called) return;
+                            called = true;
+                            reject(v)
+                        })
+                    }
                 } else {
                     // 不是promise实例，直接resolve
                     if (called) return;
@@ -232,6 +247,7 @@ module.exports =  class MyPromise {
                     resolve(x);
                 }
             } catch (error) {
+                console.log('promise reject', error)
                 if (called) return;
                 called = true;
                 reject(error);
