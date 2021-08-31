@@ -22,17 +22,19 @@ const mp2 = new MyPromise((resolve, reject) => {
 //     console.log(suc)
 // }, err => {
 //     console.error(err)
-//     return '123'
+//     return '123'  // 这里正常返回就会当成正常处理
 // }).then(res => {
-//     console.log(res)
+//     console.log('res',res)
+// }).catch(err => {
+//     console.log('catch', err)  // 这里不执行
 // })
 
 mp2.then(() => {
-    return MyPromise.reject('错误')
+    return MyPromise.reject(new MyPromise(() => {}))
 })
 .then(res => {
     console.log('then', res) // 这里不执行
 })
 .catch(err => {
-    console.log('catch', err)
+    console.log('catch--', err)
 })

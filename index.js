@@ -213,39 +213,25 @@ module.exports =  class MyPromise {
         if (promise2 === x) {
             return reject(new TypeError('循环引用'))
         }
-        if (x !== null && (Object.prototype.toString.call(x) === '[object Object]' || Object.prototype.toString.call(x) === '[object Function]')) {
+        // if (x !== null && (Object.prototype.toString.call(x) === '[object Object]' || Object.prototype.toString.call(x) === '[object Function]')) {
             // x是对象或者函数
+        if(x instanceof MyPromise){ // 优化判断
             // 自己实现的MyPromise返回的是一个对象
             try {
-                let then = x.then;
-                if (typeof then === 'function') {
-                    // 如果then是个方法，说明x是一个promise实例，执行then方法
-                    // 这里还要判断promise的状态是rejected还是resolved，如果是rejected就调用reject()
-                    if (x.state === FULFILLED) {
-                        // 例如 return Promise.resolve()
-                        then.call(x, (v) => {
-                            // 别人的Promise的then方法可能设置了getter等，使用called防止多次调用then方法
-                            if (called) return;
-                            called = true;
-                            // 再次递归调用resolvePromise处理返回值，直到x不是promise
-                            resolvePromise(promise2, v, resolve, reject)
-                        })
-                    } else {
-                        // 例如 return Promise.reject()
-                        then.call(x, () => {},
-                        (v) => {
-                            // 别人的Promise的then方法可能设置了getter等，使用called防止多次调用then方法
-                            if (called) return;
-                            called = true;
-                            reject(v)
-                        })
-                    }
-                } else {
-                    // 不是promise实例，直接resolve
-                    if (called) return;
+                if (called) return;
+                x.then.call(x, (v) => {
+                    // 例如 return Promise.resolve()
+                    // 再次递归调用resolvePromise处理返回值，直到x不是promise
+                    self.resolvePromise(promise2, v, resolve, reject)
+                    // 别人的Promise的then方法可能设置了getter等，使用called防止多次调用then方法
                     called = true;
-                    resolve(x);
-                }
+                },(v) => {
+                    // 例如 return Promise.reject()
+                    // 不论返回什么都走reject，即使是promise
+                    reject(v)
+                    // 别人的Promise的then方法可能设置了getter等，使用called防止多次调用then方法
+                    called = true;
+                })
             } catch (error) {
                 console.log('promise reject', error)
                 if (called) return;

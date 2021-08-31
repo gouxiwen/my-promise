@@ -35,40 +35,40 @@ let arr = [1,9,34,5,6,33,3,5,6,3]
 // }
 // console.log(quickSort(arr))
 // 第二种不用新数组来保存，直接在原数组上操作，内存占用比较少
-// 第二种，选择一个基准，先从最后向前找到第一个比基准小的，交换，记录位置，然后从第一个向后找第一个比基准答得，交换位置，重复意思步骤，直到左右相遇
-// function quickSort(arr,left = 0,right = arr.length - 1){
-//     if(left < right) {
-//         let i = left,j = right;
-//         let x = arr[left] // 基准保存在x中
-//         while(i < j) {
-//             // 从右边开始找小于x的数
-//             while(i < j && arr[j] > x) {
-//                 j--
-//             }
-//             if(i < j) {
-//                 // 交换位置
-//                 arr[i] = arr[j]
-//                 i++
-//             }
-//             // 从左边开始找大于x的数
-//             while(i < j && arr[i] < x) {
-//                 i++
-//             }
-//             if(i < j) {
-//                 // 交换位置
-//                 arr[j] = arr[i]
-//                 j--
-//             }
-//             // i和j重合时，基准数赋值给
-//             arr[i] = x
-//             // 对i左右两边对数组分别递归以上操作
-//             quickSort(arr, left, i -1) // i左边
-//             quickSort(arr, i + 1, right) // i右边
-//         }
-//     }
-//     return arr;
-// }
-// console.log(quickSort(arr))
+// 第二种，选择一个基准，先从最后向前找到第一个比基准小的，交换，记录位置，然后从第一个向后找第一个比基准大的，交换位置，重复以上步骤，直到左右相遇
+function quickSort(arr,left = 0,right = arr.length - 1){
+    if(left < right) {
+        let i = left,j = right;
+        let x = arr[left] // 基准保存在x中
+        while(i < j) {
+            // 从右边开始找小于x的数
+            while(i < j && arr[j] > x) {
+                j--
+            }
+            if(i < j) {
+                // 交换位置
+                arr[i] = arr[j]
+                i++
+            }
+            // 从左边开始找大于x的数
+            while(i < j && arr[i] < x) {
+                i++
+            }
+            if(i < j) {
+                // 交换位置
+                arr[j] = arr[i]
+                j--
+            }
+        }
+        // i和j重合时，基准数赋值给
+        arr[i] = x
+        // 对i左右两边对数组分别递归以上操作
+        quickSort(arr, left, i -1) // i左边
+        quickSort(arr, i + 1, right) // i右边
+    }
+    return arr;
+}
+console.log(quickSort(arr))
 // 选择排序，最坏O(n^2)，最好O(n^2)
 // function selectSort(arr) {
 //     let len = arr.length;
@@ -103,24 +103,24 @@ let arr = [1,9,34,5,6,33,3,5,6,3]
 // }
 // console.log(insertSort(arr))
 // 希尔排序，最坏O(n^2)，最好O(n)
-function ShellSort(arr) {
-    let len = arr.length;
-    let temp;
-    let gap = Math.floor(len/2)
-    while (gap >= 1) {  //当分组变成成1时则排序完成
-       for (let i = gap; i < len; i++) {  //按增量循环数组
-           temp = arr[i]; // 待排序数值
-            let j = i - gap
-           //增量大于零且前面的数组的值大于待排序数值则交换位置
-           for (; j >= 0 && arr[j] > temp; j -= gap) {
-               arr[j + gap] = arr[j]; // 如果比待排序数值大，则向后移动gap
-           }
-           arr[j + gap] = temp;
-       }
-       gap = Math.floor(gap/2); //递减增量
-    }
-    return arr;
-}
+// function ShellSort(arr) {
+//     let len = arr.length;
+//     let temp;
+//     let gap = Math.floor(len/2)
+//     while (gap >= 1) {  //当分组变成成1时则排序完成
+//        for (let i = gap; i < len; i++) {  //按增量循环数组
+//            temp = arr[i]; // 待排序数值
+//             let j = i - gap
+//            //增量大于零且前面的数组的值大于待排序数值则交换位置
+//            for (; j >= 0 && arr[j] > temp; j -= gap) {
+//                arr[j + gap] = arr[j]; // 如果比待排序数值大，则向后移动gap
+//            }
+//            arr[j + gap] = temp;
+//        }
+//        gap = Math.floor(gap/2); //递减增量
+//     }
+//     return arr;
+// }
 // function shellSort(arr) {
 //     for(let gap = Math.floor(arr.length/2); gap > 0; gap = Math.floor(gap/2)) {
 //       // 内层循环与插入排序的写法基本一致，只是每次移动的步长变为 gap
@@ -138,4 +138,4 @@ function ShellSort(arr) {
 //     }
 //     return arr;
 //   }
-console.log(ShellSort(arr))
+// console.log(ShellSort(arr))
